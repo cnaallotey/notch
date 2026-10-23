@@ -24,6 +24,10 @@
     <string>Notch shows your upcoming events on the Home tab.</string>
     <key>NSCalendarsFullAccessUsageDescription</key>
     <string>Notch shows your upcoming events on the Home tab.</string>
+    <key>NSLocationUsageDescription</key>
+    <string>Notch shows the weather where you are on the Widgets tab.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Notch shows the weather where you are on the Widgets tab.</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSHumanReadableCopyright</key>

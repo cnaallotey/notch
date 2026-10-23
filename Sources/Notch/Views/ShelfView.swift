@@ -87,7 +87,7 @@ private struct ShelfItemView: View {
     }
 }
 
-private struct ShelfActionButton: View {
+struct ShelfActionButton: View {
     let symbol: String
     let title: String
     let action: () -> Void

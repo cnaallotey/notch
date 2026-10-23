@@ -3,12 +3,14 @@ import Combine
 import SwiftUI
 
 enum NotchTab: String, CaseIterable, Identifiable {
-    case home, shelf
+    case home, widgets, clipboard, shelf
 
     var id: String { rawValue }
     var icon: String {
         switch self {
         case .home: return "house.fill"
+        case .widgets: return "square.grid.2x2.fill"
+        case .clipboard: return "doc.on.clipboard.fill"
         case .shelf: return "tray.full.fill"
         }
     }
@@ -19,6 +21,8 @@ enum LiveActivity: Equatable {
     case media
     case power(level: Int, pluggedIn: Bool)
     case shelf(count: Int)
+    case timer
+    case timerDone
 }
 
 final class NotchViewModel: ObservableObject {
@@ -49,12 +53,17 @@ final class NotchViewModel: ObservableObject {
     let battery = BatteryMonitor()
     let shelf = ShelfStore()
     let calendar = CalendarStore()
+    let timer = TimerStore()
+    let clipboard = ClipboardStore()
+    let stats = SystemStats()
+    let weather = WeatherStore()
 
     private var flashWork: DispatchWorkItem?
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-        for publisher in [media.objectWillChange, battery.objectWillChange, shelf.objectWillChange, calendar.objectWillChange] {
+        for publisher in [media.objectWillChange, battery.objectWillChange, shelf.objectWillChange, calendar.objectWillChange,
+                          timer.objectWillChange] {
             publisher.sink { [weak self] _ in self?.objectWillChange.send() }.store(in: &cancellables)
         }
         battery.onPowerSourceChange = { [weak self] pluggedIn, level in
@@ -63,6 +72,13 @@ final class NotchViewModel: ObservableObject {
         shelf.onAdd = { [weak self] in
             guard let self, !self.isOpen else { return }
             self.showFlash(.shelf(count: self.shelf.items.count))
+        }
+        timer.onFinish = { [weak self] in
+            guard let self else { return }
+            if self.hapticsEnabled {
+                NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+            }
+            self.showFlash(.timerDone, duration: 4)
         }
     }
 
@@ -78,6 +94,7 @@ final class NotchViewModel: ObservableObject {
 
     var activity: LiveActivity? {
         if let flash { return flash }
+        if timer.isActive { return .timer }
         if showMediaActivity && media.isPlaying && media.hasTrack { return .media }
         return nil
     }

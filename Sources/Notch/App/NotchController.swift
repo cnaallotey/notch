@@ -58,6 +58,10 @@ final class NotchController {
             ("open-home-prompt", { self.viewModel.open(tab: .home, pinned: true) }),
             ("open-home", { self.viewModel.calendar.loadPreviewEvents() }),
             ("open-shelf", { self.viewModel.tab = .shelf }),
+            ("open-widgets", { self.viewModel.weather.loadPreviewWeather(); self.viewModel.tab = .widgets }),
+            ("open-widgets-timer", { self.viewModel.timer.start(minutes: 25) }),
+            ("open-clipboard", { self.viewModel.clipboard.loadPreviewItems(); self.viewModel.tab = .clipboard }),
+            ("timer-activity", { self.viewModel.close() }),
         ]
         for (index, step) in steps.enumerated() {
             DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 1.5 + 0.5) { step.1() }

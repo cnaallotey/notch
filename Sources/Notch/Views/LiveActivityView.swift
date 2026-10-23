@@ -40,6 +40,14 @@ struct LiveActivityView: View {
             Image(systemName: "tray.and.arrow.down.fill")
                 .font(.system(size: iconSize * 0.7))
                 .foregroundColor(.accentColor)
+        case .timer:
+            Image(systemName: vm.timer.isRunning ? "timer" : "pause.fill")
+                .font(.system(size: iconSize * 0.7, weight: .semibold))
+                .foregroundColor(.orange)
+        case .timerDone:
+            Image(systemName: "bell.fill")
+                .font(.system(size: iconSize * 0.7))
+                .foregroundColor(.orange)
         }
     }
 
@@ -56,6 +64,17 @@ struct LiveActivityView: View {
             Text("\(count)")
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundColor(.white)
+        case .timer:
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                Text(TimerStore.format(vm.timer.remaining(at: context.date)))
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(.orange)
+            }
+        case .timerDone:
+            Text("Done")
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundColor(.orange)
         }
     }
 }

@@ -79,6 +79,8 @@ private struct OpenNotchView: View {
             Group {
                 switch vm.tab {
                 case .home: HomeView()
+                case .widgets: WidgetsView()
+                case .clipboard: ClipboardView()
                 case .shelf: ShelfView()
                 }
             }

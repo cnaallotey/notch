@@ -164,7 +164,7 @@ private struct EventRow: View {
     }
 }
 
-private struct PromptButton: View {
+struct PromptButton: View {
     let symbol: String
     let title: String
     let action: () -> Void

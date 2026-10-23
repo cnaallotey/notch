@@ -17,6 +17,12 @@ with a hardware notch, and draws a matching virtual notch on Macs and displays w
   The first time, click **Show my events** to grant access.
 - **File shelf.** Drag files onto the notch to park them, then drag them back out into any app.
   Double-click to open, right-click for Show in Finder or AirDrop, or AirDrop everything at once.
+- **Widgets.** Weather for where you are (current temperature, conditions and today's high and low, from
+  Open-Meteo), a countdown timer with quick presets, and live CPU, memory and disk usage. While a timer runs
+  the closed notch shows the time left, and it chimes when it's done. The first time, click
+  **Show local weather** to grant location access.
+- **Clipboard history.** The last 20 pieces of text you copied. Click one to copy it again. History is kept
+  in memory only, and anything a password manager marks as concealed is never recorded.
 - **Header bar.** Battery level and charging state, the clock, and a settings menu.
 - **Menu bar icon.** Open the notch, toggle settings, set Launch at Login, or quit.
 
@@ -51,7 +57,9 @@ DEBUG=1 scripts/build.sh --run
 ```
 Sources/Notch/
   main.swift                 app entry (accessory app, no Dock icon)
-  App/                       AppDelegate, NotchPanel (window), NotchController (hover + layout), NotchViewModel
-  Services/                  MediaController, BatteryMonitor, ShelfStore, LoginItem
-  Views/                     NotchView, NotchShape, HeaderView, HomeView, ShelfView, LiveActivityView
+  App/                       AppDelegate, NotchPanel (window), NotchSpace, NotchController (hover + layout), NotchViewModel
+  Services/                  MediaController, BatteryMonitor, ShelfStore, CalendarStore, TimerStore,
+                             ClipboardStore, SystemStats, WeatherStore, LoginItem
+  Views/                     NotchView, NotchShape, HeaderView, HomeView, WidgetsView, ClipboardView,
+                             ShelfView, CalendarCard, LiveActivityView
 ```
