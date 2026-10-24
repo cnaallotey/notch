@@ -28,6 +28,10 @@
     <string>Notch shows the weather where you are on the Widgets tab.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Notch shows the weather where you are on the Widgets tab.</string>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>Notch shows a notice when your AirPods or other Bluetooth devices connect.</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>Notch switches between Light and Dark Mode from the Controls tab.</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSHumanReadableCopyright</key>

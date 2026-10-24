@@ -9,6 +9,11 @@ final class BatteryMonitor: ObservableObject {
 
     /// Called when the charger is connected or removed: (pluggedIn, level).
     var onPowerSourceChange: ((Bool, Int) -> Void)?
+    /// Called once each time the battery drops to 20% and again at 10% while unplugged.
+    var onLowBattery: ((Int) -> Void)?
+
+    private let lowLevels = [20, 10]
+    private var warnedLevel: Int?
 
     private var runLoopSource: CFRunLoopSource?
 
@@ -42,6 +47,20 @@ final class BatteryMonitor: ObservableObject {
         }
     }
 
+    private func checkLowBattery(notify: Bool) {
+        if isPluggedIn {
+            warnedLevel = nil
+            return
+        }
+        guard let threshold = lowLevels.last(where: { level <= $0 }) else {
+            warnedLevel = nil
+            return
+        }
+        if let warnedLevel, warnedLevel <= threshold { return }
+        warnedLevel = threshold
+        if notify { onLowBattery?(level) }
+    }
+
     private func update(notify: Bool) {
         guard let info = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
               let list = IOPSCopyPowerSourcesList(info)?.takeRetainedValue() as? [CFTypeRef] else { return }
@@ -63,6 +82,7 @@ final class BatteryMonitor: ObservableObject {
             if notify && pluggedIn != wasPluggedIn {
                 onPowerSourceChange?(pluggedIn, level)
             }
+            checkLowBattery(notify: notify)
             return
         }
     }

@@ -80,6 +80,7 @@ private struct OpenNotchView: View {
                 switch vm.tab {
                 case .home: HomeView()
                 case .widgets: WidgetsView()
+                case .controls: ControlsView()
                 case .clipboard: ClipboardView()
                 case .shelf: ShelfView()
                 }

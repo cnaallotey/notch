@@ -6,15 +6,27 @@ struct LiveActivityView: View {
     let activity: LiveActivity
 
     var body: some View {
-        let side = vm.activitySideWidth
+        let side = vm.sideWidth(for: activity)
         let iconSize = vm.notchSize.height - 8
 
         HStack(spacing: 0) {
-            leading(iconSize: iconSize)
-                .frame(width: side, alignment: .center)
-            Spacer(minLength: vm.notchSize.width)
-            trailing(iconSize: iconSize)
-                .frame(width: side, alignment: .center)
+            if case .notice(let notice) = activity {
+                NoticeLeading(notice: notice, iconSize: iconSize)
+                    .frame(width: side, alignment: .leading)
+                Spacer(minLength: vm.notchSize.width)
+                Text(notice.detail)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundColor(notice.tint == .gray ? .gray : .white)
+                    .lineLimit(1)
+                    .padding(.trailing, 10)
+                    .frame(width: side, alignment: .trailing)
+            } else {
+                leading(iconSize: iconSize)
+                    .frame(width: side, alignment: .center)
+                Spacer(minLength: vm.notchSize.width)
+                trailing(iconSize: iconSize)
+                    .frame(width: side, alignment: .center)
+            }
         }
         .frame(maxHeight: .infinity)
     }
@@ -48,6 +60,8 @@ struct LiveActivityView: View {
             Image(systemName: "bell.fill")
                 .font(.system(size: iconSize * 0.7))
                 .foregroundColor(.orange)
+        case .notice:
+            EmptyView()
         }
     }
 
@@ -75,7 +89,28 @@ struct LiveActivityView: View {
             Text("Done")
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundColor(.orange)
+        case .notice:
+            EmptyView()
         }
+    }
+}
+
+private struct NoticeLeading: View {
+    let notice: Notice
+    let iconSize: CGFloat
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: notice.symbol)
+                .font(.system(size: iconSize * 0.65, weight: .semibold))
+                .foregroundColor(notice.tint)
+                .frame(width: iconSize)
+            Text(notice.title)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(.white)
+                .lineLimit(1)
+        }
+        .padding(.leading, 8)
     }
 }
 

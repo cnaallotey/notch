@@ -60,6 +60,11 @@ final class NotchController {
             ("open-shelf", { self.viewModel.tab = .shelf }),
             ("open-widgets", { self.viewModel.weather.loadPreviewWeather(); self.viewModel.tab = .widgets }),
             ("open-widgets-timer", { self.viewModel.timer.start(minutes: 25) }),
+            ("open-controls", { self.viewModel.tab = .controls }),
+            ("notice", {
+                self.viewModel.close()
+                self.viewModel.showFlash(.notice(Notice(symbol: "airpodspro", tint: .blue, title: "AirPods Pro", detail: "Connected")), duration: 5)
+            }),
             ("open-clipboard", { self.viewModel.clipboard.loadPreviewItems(); self.viewModel.tab = .clipboard }),
             ("timer-activity", { self.viewModel.close() }),
         ]

@@ -12,6 +12,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         setUpStatusItem()
     }
 
+    func applicationWillTerminate(_ notification: Notification) {
+        viewModel.brightness.restoreAll()
+    }
+
     // MARK: - Menu bar item
 
     private func setUpStatusItem() {

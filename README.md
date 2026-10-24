@@ -21,6 +21,16 @@ with a hardware notch, and draws a matching virtual notch on Macs and displays w
   Open-Meteo), a countdown timer with quick presets, and live CPU, memory and disk usage. While a timer runs
   the closed notch shows the time left, and it chimes when it's done. The first time, click
   **Show local weather** to grant location access.
+- **Notices.** The closed notch briefly shows when AirPods or other Bluetooth devices connect or disconnect,
+  when the battery drops to 20% and 10%, and five minutes before a calendar event starts.
+- **Quick toggles.** On the Controls tab: Keep Awake (stops the display sleeping), Dark Mode, mute the
+  microphone, hide desktop icons (relaunches Finder), take a screenshot, and turn the display off. Dark Mode
+  asks for permission to control System Events the first time.
+- **Display brightness.** Also on the Controls tab, a slider for every connected display, built-in and mirrored ones included, using
+  software dimming (inspired by MonitorControl Lite). Regular displays are dimmed through their gamma table;
+  AirPlay, Sidecar and DisplayLink screens get a click-through dimming overlay instead. Right-click a display
+  to reset it or switch method. Levels are remembered per display and reapplied after wake or reconnecting,
+  and the normal colours come back as soon as Notch quits.
 - **Clipboard history.** The last 20 pieces of text you copied. Click one to copy it again. History is kept
   in memory only, and anything a password manager marks as concealed is never recorded.
 - **Header bar.** Battery level and charging state, the clock, and a settings menu.
@@ -48,6 +58,10 @@ DEBUG=1 scripts/build.sh --run
 
 - Now Playing uses Apple's private `MediaRemote` framework. It works on macOS 13 and 14. Apple restricted
   it for third-party apps in macOS 15.4, so media info may not appear on newer systems.
+- Display brightness is software dimming only: it darkens the picture but doesn't change the monitor's
+  backlight. Apps that also change gamma (f.lux, some calibration tools) will conflict with it.
+- Focus and Do Not Disturb aren't included: macOS has no public API for them, and reading their state
+  needs Full Disk Access.
 - The shelf stores references to your files, not copies. A file that is moved or deleted drops off the shelf.
 - On a Mac without a notch, the virtual notch sits on the built-in display (or the main display if the lid
   is closed) and matches the menu bar's height.
@@ -59,7 +73,8 @@ Sources/Notch/
   main.swift                 app entry (accessory app, no Dock icon)
   App/                       AppDelegate, NotchPanel (window), NotchSpace, NotchController (hover + layout), NotchViewModel
   Services/                  MediaController, BatteryMonitor, ShelfStore, CalendarStore, TimerStore,
-                             ClipboardStore, SystemStats, WeatherStore, LoginItem
-  Views/                     NotchView, NotchShape, HeaderView, HomeView, WidgetsView, ClipboardView,
+                             ClipboardStore, SystemStats, WeatherStore, DisplayBrightness,
+                             QuickToggles, BluetoothMonitor, LoginItem
+  Views/                     NotchView, NotchShape, HeaderView, HomeView, WidgetsView, ControlsView, ClipboardView,
                              ShelfView, CalendarCard, LiveActivityView
 ```
