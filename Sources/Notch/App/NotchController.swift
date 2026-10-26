@@ -67,6 +67,13 @@ final class NotchController {
             }),
             ("open-clipboard", { self.viewModel.clipboard.loadPreviewItems(); self.viewModel.tab = .clipboard }),
             ("timer-activity", { self.viewModel.close() }),
+            ("alert", {
+                self.viewModel.present(NotchAlert(id: 1, bundleID: "com.apple.MobileSMS", appName: "Messages",
+                                                  icon: NSWorkspace.shared.icon(forFile: "/System/Applications/Messages.app"),
+                                                  symbol: nil, title: "Ama Mensah", subtitle: "",
+                                                  body: "Are we still on for lunch tomorrow? I found a great new place near the office.",
+                                                  date: Date()))
+            }),
         ]
         for (index, step) in steps.enumerated() {
             DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 1.5 + 0.5) { step.1() }
@@ -155,7 +162,8 @@ final class NotchController {
             }
             let started = hoverStartedAt ?? now
             hoverStartedAt = started
-            if viewModel.openOnHover && !buttonDown && now.timeIntervalSince(started) >= hoverDelay {
+            // Hovering an alert pauses it rather than opening the notch; clicking opens the app.
+            if viewModel.openOnHover && viewModel.alert == nil && !buttonDown && now.timeIntervalSince(started) >= hoverDelay {
                 viewModel.open()
             }
         } else {

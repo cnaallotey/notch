@@ -6,8 +6,9 @@ struct NotchView: View {
 
     var body: some View {
         let size = vm.currentSize
-        let topRadius = vm.isOpen ? vm.openTopRadius : vm.closedTopRadius
-        let bottomRadius = vm.isOpen ? vm.openBottomRadius : vm.closedBottomRadius
+        let expanded = vm.isOpen || vm.alert != nil
+        let topRadius = expanded ? vm.openTopRadius : vm.closedTopRadius
+        let bottomRadius = expanded ? vm.openBottomRadius : vm.closedBottomRadius
         let shape = NotchShape(topRadius: topRadius, bottomRadius: bottomRadius)
 
         ZStack(alignment: .top) {
@@ -15,6 +16,13 @@ struct NotchView: View {
                 OpenNotchView()
                     .transition(.asymmetric(
                         insertion: .opacity.combined(with: .scale(scale: 0.92, anchor: .top)).animation(NotchViewModel.spring.delay(0.05)),
+                        removal: .opacity.animation(.easeOut(duration: 0.12))
+                    ))
+            } else if let alert = vm.alert {
+                AlertView(alert: alert)
+                    .id(alert.id)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .scale(scale: 0.9, anchor: .top)).animation(NotchViewModel.spring.delay(0.05)),
                         removal: .opacity.animation(.easeOut(duration: 0.12))
                     ))
             } else {
@@ -32,8 +40,8 @@ struct NotchView: View {
                 .padding(.horizontal, 1)
         )
         .contentShape(shape)
-        .scaleEffect(!vm.isOpen && vm.isHovering ? 1.04 : 1, anchor: .top)
-        .shadow(color: .black.opacity(vm.isOpen ? 0.55 : 0), radius: 14, y: 6)
+        .scaleEffect(!expanded && vm.isHovering ? 1.04 : 1, anchor: .top)
+        .shadow(color: .black.opacity(expanded ? 0.55 : 0), radius: 14, y: 6)
         .onDrop(of: [UTType.fileURL], isTargeted: $vm.isDropTargeted) { providers in
             vm.tab = .shelf
             return vm.shelf.add(providers: providers)

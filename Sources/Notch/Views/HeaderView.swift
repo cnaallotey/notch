@@ -80,6 +80,7 @@ private struct SettingsMenu: View {
         Menu {
             Toggle("Open on Hover", isOn: $vm.openOnHover)
             Toggle("Show Music Activity", isOn: $vm.showMediaActivity)
+            Toggle("Show App Notifications", isOn: $vm.showAppNotifications)
             Toggle("Haptic Feedback", isOn: $vm.hapticsEnabled)
             Toggle("Launch at Login", isOn: Binding(get: { LoginItem.isEnabled }, set: { LoginItem.setEnabled($0) }))
             Divider()

@@ -34,6 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(.separator())
         menu.addItem(item("Open on Hover", #selector(toggleHover), checked: viewModel.openOnHover))
         menu.addItem(item("Show Music Activity", #selector(toggleMediaActivity), checked: viewModel.showMediaActivity))
+        menu.addItem(item("Show App Notifications", #selector(toggleNotifications), checked: viewModel.showAppNotifications))
         menu.addItem(item("Haptic Feedback", #selector(toggleHaptics), checked: viewModel.hapticsEnabled))
         menu.addItem(item("Launch at Login", #selector(toggleLogin), checked: LoginItem.isEnabled))
         menu.addItem(.separator())
@@ -50,6 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func toggleNotch() { viewModel.isOpen ? viewModel.close() : viewModel.open(pinned: true) }
     @objc private func toggleHover() { viewModel.openOnHover.toggle() }
     @objc private func toggleMediaActivity() { viewModel.showMediaActivity.toggle() }
+    @objc private func toggleNotifications() { viewModel.showAppNotifications.toggle() }
     @objc private func toggleHaptics() { viewModel.hapticsEnabled.toggle() }
     @objc private func toggleLogin() { LoginItem.setEnabled(!LoginItem.isEnabled) }
     @objc private func quit() { NSApp.terminate(nil) }

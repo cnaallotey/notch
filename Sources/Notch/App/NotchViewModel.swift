@@ -46,6 +46,7 @@ final class NotchViewModel: ObservableObject {
     @Published var notchSize = CGSize(width: 190, height: 24)
     @Published var hasPhysicalNotch = false
     @Published private(set) var flash: LiveActivity?
+    @Published private(set) var alert: NotchAlert?
 
     @Published var openOnHover = UserDefaults.standard.object(forKey: "openOnHover") as? Bool ?? true {
         didSet { UserDefaults.standard.set(openOnHover, forKey: "openOnHover") }
@@ -55,6 +56,12 @@ final class NotchViewModel: ObservableObject {
     }
     @Published var hapticsEnabled = UserDefaults.standard.object(forKey: "hapticsEnabled") as? Bool ?? true {
         didSet { UserDefaults.standard.set(hapticsEnabled, forKey: "hapticsEnabled") }
+    }
+    @Published var showAppNotifications = UserDefaults.standard.object(forKey: "showAppNotifications") as? Bool ?? true {
+        didSet {
+            UserDefaults.standard.set(showAppNotifications, forKey: "showAppNotifications")
+            showAppNotifications ? notifications.start() : notifications.stop()
+        }
     }
 
     let openSize = CGSize(width: 600, height: 206)
@@ -70,10 +77,14 @@ final class NotchViewModel: ObservableObject {
     let brightness = DisplayBrightness()
     let toggles = QuickToggles()
     private let bluetooth = BluetoothMonitor()
+    private let notifications = NotificationWatcher()
 
     private var flashWork: DispatchWorkItem?
     private var meetingTimer: Timer?
     private var announcedMeetings = Set<String>()
+    private var alertQueue: [NotchAlert] = []
+    private var alertWork: DispatchWorkItem?
+    private let alertDuration: TimeInterval = 5
     private var cancellables = Set<AnyCancellable>()
 
     init() {
@@ -112,6 +123,9 @@ final class NotchViewModel: ObservableObject {
                                     title: "Low Battery", detail: "\(level)%"))
         }
 
+        notifications.onAlert = { [weak self] alert in self?.present(alert) }
+        if showAppNotifications { notifications.start() }
+
         let timer = Timer(timeInterval: 30, repeats: true) { [weak self] _ in self?.checkUpcomingMeetings() }
         RunLoop.main.add(timer, forMode: .common)
         meetingTimer = timer
@@ -129,6 +143,54 @@ final class NotchViewModel: ObservableObject {
         let minutes = max(Int((event.start.timeIntervalSince(now) / 60).rounded(.up)), 1)
         showNotice(Notice(symbol: event.meetingURL != nil ? "video.fill" : "calendar", tint: event.color,
                           title: event.title, detail: "in \(minutes) min"), duration: 6)
+    }
+
+    // MARK: - App notification alerts
+
+    /// Shows an iOS-style banner that drops out of the notch. Alerts arriving meanwhile wait their turn.
+    func present(_ newAlert: NotchAlert) {
+        guard !isOpen else { return }
+        guard alert == nil else {
+            alertQueue.append(newAlert)
+            return
+        }
+        if hapticsEnabled {
+            NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
+        }
+        withAnimation(Self.spring) { alert = newAlert }
+        scheduleAlertDismissal(after: alertDuration)
+    }
+
+    /// Opens the app that sent the current alert.
+    func openAlertSource() {
+        guard let alert else { return }
+        if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: alert.bundleID) {
+            NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+        }
+        dismissAlert()
+    }
+
+    func dismissAlert() {
+        alertWork?.cancel()
+        withAnimation(Self.spring) { alert = nil }
+        guard !alertQueue.isEmpty else { return }
+        let next = alertQueue.removeFirst()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in self?.present(next) }
+    }
+
+    private func scheduleAlertDismissal(after delay: TimeInterval) {
+        alertWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            // Keep it up while the pointer rests on it.
+            if self.isHovering {
+                self.scheduleAlertDismissal(after: 1)
+            } else {
+                self.dismissAlert()
+            }
+        }
+        alertWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
     }
 
     private func showNotice(_ notice: Notice, duration: TimeInterval = 4) {
@@ -168,7 +230,14 @@ final class NotchViewModel: ObservableObject {
         return CGSize(width: width, height: notchSize.height)
     }
 
-    var currentSize: CGSize { isOpen ? openSize : closedSize }
+    var alertSize: CGSize {
+        CGSize(width: max(notchSize.width + 230, 420), height: notchSize.height + 78)
+    }
+
+    var currentSize: CGSize {
+        if isOpen { return openSize }
+        return alert != nil ? alertSize : closedSize
+    }
 
     // MARK: - Actions
 
@@ -176,6 +245,9 @@ final class NotchViewModel: ObservableObject {
         if let tab { self.tab = tab }
         isPinned = pinned
         guard !isOpen else { return }
+        alertWork?.cancel()
+        alertQueue.removeAll()
+        alert = nil
         calendar.reload()
         if hapticsEnabled {
             NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)

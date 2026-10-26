@@ -21,6 +21,11 @@ with a hardware notch, and draws a matching virtual notch on Macs and displays w
   Open-Meteo), a countdown timer with quick presets, and live CPU, memory and disk usage. While a timer runs
   the closed notch shows the time left, and it chimes when it's done. The first time, click
   **Show local weather** to grant location access.
+- **iOS-style notification alerts.** Notifications from other apps (Messages, Mail, Slack, Calendar…) and
+  Focus changes drop out of the notch as a banner with the app's icon, title and message. Click one to open
+  the app; rest the pointer on it to keep it up. Turn it off with **Show App Notifications** in settings.
+  macOS still shows its own banner too; to see only Notch's, set an app's alert style to **None** in
+  System Settings › Notifications (keep "Show in Notification Centre" on).
 - **Notices.** The closed notch briefly shows when AirPods or other Bluetooth devices connect or disconnect,
   when the battery drops to 20% and 10%, and five minutes before a calendar event starts.
 - **Quick toggles.** On the Controls tab: Keep Awake (stops the display sleeping), Dark Mode, mute the
@@ -60,8 +65,9 @@ DEBUG=1 scripts/build.sh --run
   it for third-party apps in macOS 15.4, so media info may not appear on newer systems.
 - Display brightness is software dimming only: it darkens the picture but doesn't change the monitor's
   backlight. Apps that also change gamma (f.lux, some calibration tools) will conflict with it.
-- Focus and Do Not Disturb aren't included: macOS has no public API for them, and reading their state
-  needs Full Disk Access.
+- App notification alerts work by reading Notification Center's database on this Mac; nothing leaves
+  the machine. On macOS 15 and later that database is protected, so Notch needs Full Disk Access there.
+- There's no Do Not Disturb toggle: macOS has no public API for switching Focus.
 - The shelf stores references to your files, not copies. A file that is moved or deleted drops off the shelf.
 - On a Mac without a notch, the virtual notch sits on the built-in display (or the main display if the lid
   is closed) and matches the menu bar's height.
@@ -74,7 +80,7 @@ Sources/Notch/
   App/                       AppDelegate, NotchPanel (window), NotchSpace, NotchController (hover + layout), NotchViewModel
   Services/                  MediaController, BatteryMonitor, ShelfStore, CalendarStore, TimerStore,
                              ClipboardStore, SystemStats, WeatherStore, DisplayBrightness,
-                             QuickToggles, BluetoothMonitor, LoginItem
-  Views/                     NotchView, NotchShape, HeaderView, HomeView, WidgetsView, ControlsView, ClipboardView,
+                             QuickToggles, BluetoothMonitor, NotificationWatcher, LoginItem
+  Views/                     NotchView, NotchShape, HeaderView, HomeView, WidgetsView, ControlsView, ClipboardView, AlertView,
                              ShelfView, CalendarCard, LiveActivityView
 ```
